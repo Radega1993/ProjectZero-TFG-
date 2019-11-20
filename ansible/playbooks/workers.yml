@@ -1,0 +1,75 @@
+--- # Workers
+- hosts: workers
+  become: yes
+  vars_files:
+  - env_var
+  tasks:
+
+  - name: Disable SElinux
+    selinux:
+      state: disabled
+
+  - name: Allow Network Ports in Firewalld
+    firewalld:
+     port: "{{ item }}"
+     state: enabled
+     permanent: yes
+     immediate: yes
+    with_items: "{{ ports }}"
+
+  - name: adding the module br_netfilter to linux kernel
+    shell: "modprobe br_netfilter"
+
+  - name: Enabling Bridge Firewall Rule
+    shell: |
+      echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+      echo '1' > /proc/sys/net/ipv4/ip_forward
+
+  - name: Create repository file for k8s
+    file:
+     path: /etc/yum.repos.d/kubernetes.repo
+     state: touch
+
+  - name: Adding repository details in Kubernetes repo file.
+    blockinfile:
+     path: /etc/yum.repos.d/kubernetes.repo
+     block: |
+      [kubernetes]
+      name=Kubernetes
+      baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+      enabled=1
+      gpgcheck=1
+      repo_gpgcheck=1
+      gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+  - name: Install kubernetes and docker
+    yum:
+     name: "{{ item }}"
+     state: present
+    with_items: "{{ packages }}"
+
+  - name: Start and enable service docker, if not started
+    service:
+     name: kubelet
+     state: started
+     enabled: yes
+
+  - name: Start and enable service kubelet, if not started
+    service:
+      name: kubelet
+      state: started
+      enabled: yes
+
+  - name: Resetting kubeadm if previous instalation
+    shell: kubeadm reset -f
+    register: output
+
+  - name: Copying token to worker nodes
+    copy: src=/home/centos/{{ token_file }} dest=/home/centos/join_token
+
+  - name: Adding worker to the cluster
+    shell: |
+     kubeadm reset -f
+     cat /home/centos/join_token | tail -2 > out.sh
+     sh out.sh

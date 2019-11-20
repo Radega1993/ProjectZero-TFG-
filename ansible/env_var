@@ -1,0 +1,18 @@
+#Variables for the master and the cidr for workers
+ad_addr: 10.0.2.4
+cidr_v: 192.168.100.0/24
+
+packages:
+- kubeadm
+- kubectl
+- docker
+
+ports:
+- "6443/tcp"
+- "10250/tcp"
+- "2379-2380/tcp"
+- "10251/tcp"
+- "10252/tcp"
+- "10255/tcp"
+
+token_file: join_token

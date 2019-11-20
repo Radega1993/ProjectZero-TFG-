@@ -1,0 +1,7 @@
+
+[master]
+Master ansible_host=10.0.2.4
+
+[worker]
+Worker1 ansible_host=10.0.2.5
+Worker2 ansible_host=10.0.2.6
