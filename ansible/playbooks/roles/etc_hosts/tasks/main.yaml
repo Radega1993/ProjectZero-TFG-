@@ -1,0 +1,4 @@
+- name: copy /etc/hosts
+  copy:
+   src: files/hosts
+   dest: /etc/hosts

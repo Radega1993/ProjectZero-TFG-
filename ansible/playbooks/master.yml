@@ -3,102 +3,14 @@
   become: yes
   vars_files:
   - env_var
-  tasks:
-  - name: change hostname to Master
-    hostname:
-      name: "Master"
-
-  # add to etc
-  - name: Add nodes to /etc/hosts
-    lineinfile:
-      path: /etc/hosts
-      regexp: "{{ hostvars[item]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}\t{{ hostvars[item]['ansible_hostname']}}\t{{ hostvars[item]['ansible_hostname']}}"
-        line: "{{ hostvars[item]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}\t{{ hostvars[item]['ansible_hostname']}}\t{{ hostvars[item]['ansible_hostname']}}"
-        state: present
-        backup: yes
-      register: etchostsupdate
-      when: ansible_hostname != "{{ item }}" or ansible_hostname == "{{ item }}"
-      with_items: "{{groups['multi']}}"
-
-  - name: Disable SElinux
-    selinux:
-      state: disabled
-
-  - name: Allow Network Ports in Firewalld
-    firewalld:
-     port: "{{ item }}"
-     state: enabled
-     permanent: yes
-     immediate: yes
-    with_items: "{{ ports }}"
-
-  - name: adding the module br_netfilter to linux kernel
-    shell: "modprobe br_netfilter"
-
-  - name: Enabling Bridge Firewall Rule
-    shell: "echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables"
-
-  - name: Disabling Swap on all nodes
-    shell: swapoff -a
-
-  - name: Commenting Swap entries in /etc/fstab
-    replace:
-     path: /etc/fstab
-     regexp: '(.*swap*)'
-     replace: '#\1'
-
-  - name: Create repository file for k8s
-    file:
-     path: /etc/yum.repos.d/kubernetes.repo
-     state: touch
-
-  - name: Adding repository details in Kubernetes repo file.
-    blockinfile:
-     path: /etc/yum.repos.d/kubernetes.repo
-     block: |
-      [kubernetes]
-      name=Kubernetes
-      baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
-      enabled=1
-      gpgcheck=1
-      repo_gpgcheck=1
-      gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
-        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-
-  - name: Install kubernetes and docker
-    yum:
-     name: "{{ item }}"
-     state: present
-    with_items: "{{ packages }}"
-
-  - name: Start and enable service docker, if not started
-    service:
-     name: kubelet
-     state: started
-     enabled: yes
-
-  - name: Start and enable service kubelet, if not started
-    service:
-      name: kubelet
-      state: started
-      enabled: yes
-
-  - name: Resetting kubeadm if previous instalation
-    shell: kubeadm reset -f
-    register: output
-
-  - name: Initializing Kubernetes cluster
-    shell: kubeadm init --apiserver-advertise-address {{ad_addr}} --pod-network-cidr={{cidr_v}}
-    register: output
-
-  - name: Storing Logs and Generated token for future purpose.
-    local_action: copy content={{ output.stdout }} dest=/home/centos/{{ token_file }}
-
-  - name: Copying required files
-    shell: |
-     mkdir -p $HOME/.kube
-     sudo cp -f /etc/kubernetes/admin.conf $HOME/.kube/config
-     sudo chown $(id -u):$(id -g) $HOME/.kube/config
-
-  - name: Install Network flannel
-    command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+  roles:
+    - etc_hosts
+    - disable_SElinux
+    - allow_netPort_firewalld
+    - br_netfilter
+    - enable_bridge_firewall
+    - disable_swap
+    - docker
+    - kubernetes
+    - init_cluster
+    - flannel

@@ -2,11 +2,6 @@
 ad_addr: 10.0.2.4
 cidr_v: 192.168.100.0/24
 
-packages:
-- kubeadm
-- kubectl
-- docker
-
 ports:
 - "6443/tcp"
 - "10250/tcp"

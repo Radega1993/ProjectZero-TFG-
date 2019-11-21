@@ -1,0 +1,7 @@
+- name: Allow Network Ports in Firewalld
+  firewalld:
+    port: "{{ item }}"
+    state: enabled
+    permanent: yes
+    immediate: yes
+  with_items: "{{ ports }}"

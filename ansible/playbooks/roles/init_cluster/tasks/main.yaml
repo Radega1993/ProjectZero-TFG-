@@ -1,0 +1,12 @@
+- name: Initializing Kubernetes cluster
+  shell: kubeadm init --apiserver-advertise-address {{ad_addr}} --pod-network-cidr={{cidr_v}}
+  register: output
+
+- name: Storing Logs and Generated token for future purpose.
+  local_action: copy content={{ output.stdout }} dest=/home/centos/{{ token_file }}
+
+- name: Copying required files
+  shell: |
+    mkdir -p $HOME/.kube
+    sudo cp -f /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo chown $(id -u):$(id -g) $HOME/.kube/config

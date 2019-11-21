@@ -1,0 +1,2 @@
+- name: adding the module br_netfilter to linux kernel
+  shell: "modprobe br_netfilter"
