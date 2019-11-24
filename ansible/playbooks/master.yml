@@ -13,4 +13,4 @@
     - docker
     - kubernetes
     - init_cluster
-    - flannel
+    - calico
