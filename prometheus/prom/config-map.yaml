@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-server-conf
-  namespace: ns-prometheus
+  namespace: kube-system
   labels:
     name: prometheus-server-conf
 data:

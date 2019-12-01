@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: ingress-service-alertmanager
-  namespace: ns-prometheus
+  namespace: kube-system
   annotations:
     kubernetes.io/ingress.class: nginx
 spec:
