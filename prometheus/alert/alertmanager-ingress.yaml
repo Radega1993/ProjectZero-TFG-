@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: ingress-service-alertmanager
-  namespace: kube-system
+  namespace: tfg-proale
   annotations:
     kubernetes.io/ingress.class: nginx
 spec:

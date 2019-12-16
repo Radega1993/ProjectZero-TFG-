@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prometheus-ip-service
-  namespace: kube-system
+  namespace: tfg-proale
   # namespace: monitoring
   annotations:
       prometheus.io/scrape: 'true'

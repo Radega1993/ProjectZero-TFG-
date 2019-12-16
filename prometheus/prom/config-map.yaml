@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-server-conf
-  namespace: kube-system
+  namespace: tfg-proale
   labels:
     name: prometheus-server-conf
 data:
