@@ -3,73 +3,39 @@ kind: Deployment
 metadata:
   name: alertmanager
   namespace: tfg-proale
-  labels:
-    k8s-app: alertmanager
-    kubernetes.io/cluster-service: "true"
-    addonmanager.kubernetes.io/mode: Reconcile
-    version: v0.14.0
 spec:
   replicas: 1
   selector:
     matchLabels:
-      k8s-app: alertmanager
-      version: v0.14.0
+      app: alertmanager
   template:
     metadata:
+      name: alertmanager
       labels:
-        k8s-app: alertmanager
-        version: v0.14.0
+        app: alertmanager
     spec:
       containers:
-        - name: prometheus-alertmanager
-          image: "prom/alertmanager:v0.14.0"
-          imagePullPolicy: "IfNotPresent"
-          args:
-            - --config.file=/etc/config/alertmanager.yml
-            - --storage.path=/data
-            - --web.external-url=/
-          ports:
-            - containerPort: 9093
-          readinessProbe:
-            httpGet:
-              path: /#/status
-              port: 9093
-            initialDelaySeconds: 30
-            timeoutSeconds: 30
-          volumeMounts:
-            - name: config-volume
-              mountPath: /etc/config
-            - name: storage-volume
-              mountPath: "/data"
-              subPath: ""
-          resources:
-            limits:
-              cpu: 10m
-              memory: 50Mi
-            requests:
-              cpu: 10m
-              memory: 50Mi
-        - name: prometheus-alertmanager-configmap-reload
-          image: "jimmidyson/configmap-reload:v0.1"
-          imagePullPolicy: "IfNotPresent"
-          args:
-            - --volume-dir=/etc/config
-            - --webhook-url=http://localhost:9093/-/reload
-          volumeMounts:
-            - name: config-volume
-              mountPath: /etc/config
-              readOnly: true
-          resources:
-            limits:
-              cpu: 10m
-              memory: 10Mi
-            requests:
-              cpu: 10m
-              memory: 10Mi
-      volumes:
+      - name: alertmanager
+        image: prom/alertmanager:v0.19.0
+        args:
+          - "--config.file=/etc/alertmanager/config.yml"
+          - "--storage.path=/alertmanager"
+        ports:
+        - name: alertmanager
+          containerPort: 9093
+        volumeMounts:
         - name: config-volume
-          configMap:
-            name: alertmanager-config
-        - name: storage-volume
-          persistentVolumeClaim:
-            claimName: alertmanager
+          mountPath: /etc/alertmanager
+        - name: templates-volume
+          mountPath: /etc/alertmanager-templates
+        - name: alertmanager
+          mountPath: /alertmanager
+      volumes:
+      - name: config-volume
+        configMap:
+          name: alertmanager-config
+      - name: templates-volume
+        configMap:
+          name: alertmanager-templates
+      - name: alertmanager
+        emptyDir: {}
