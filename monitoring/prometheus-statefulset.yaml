@@ -85,7 +85,7 @@ spec:
       name: tfg-cluster-monitoring-prometheus-data
       labels: *Labels
     spec:
-      storageClassName: do-block-storage
+      storageClassName: tfg-monitoring-sc
       accessModes:
         - ReadWriteOnce
       resources:

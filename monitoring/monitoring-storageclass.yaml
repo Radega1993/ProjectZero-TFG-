@@ -1,0 +1,7 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+    name: tfg-monitoring-sc
+provisioner: kubernetes.io/no-provisioner
+parameters:
+   repl: "3"

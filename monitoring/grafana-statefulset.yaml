@@ -110,7 +110,7 @@ spec:
   - metadata:
       name: tfg-cluster-monitoring-grafana-data
     spec:
-      storageClassName: do-block-storage
+      storageClassName: tfg-monitoring-sc
       accessModes:
         - ReadWriteOnce
       resources:
