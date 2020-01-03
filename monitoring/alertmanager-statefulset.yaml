@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tfg-cluster-monitoring-alertmanager
+  labels: &Labels
+    k8s-app: alertmanager
+    app.kubernetes.io/name: tfg-cluster-monitoring
+    app.kubernetes.io/component: alertmanager
+spec:
+  # Used to configure a stable network identity for the StatefulSet Pods 
+  # e.g. pod_name.tfg-cluster-monitoring-alertmanager-operated.$NAMESPACE.svc:6783
+  serviceName: "tfg-cluster-monitoring-alertmanager-operated"
+  # To scale the number of Alertmanager replicas, you must add `—cluster.peer` addresses 
+  # for any additional Alertmanager Pods in the `args` section of the `containers` spec. 
+  replicas: 2
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels: *Labels
+  template:
+    metadata:
+      labels: *Labels
+    spec:
+      serviceAccountName: alertmanager
+      containers:
+        - name: prometheus-alertmanager
+          # The Alertmanager container image
+          image: quay.io/prometheus/alertmanager:v0.16.0
+          imagePullPolicy: Always
+          args:
+            - --config.file=/etc/config/alertmanager.yml
+            - --storage.path=/data
+            - --web.listen-address=:9093
+            - --web.route-prefix=/
+            - --cluster.listen-address=$(POD_IP):6783
+            - --cluster.peer=tfg-cluster-monitoring-alertmanager-0.tfg-cluster-monitoring-alertmanager-operated.$NAMESPACE.svc:6783
+            - --cluster.peer=tfg-cluster-monitoring-alertmanager-1.tfg-cluster-monitoring-alertmanager-operated.$NAMESPACE.svc:6783
+            - --log.level=debug
+          env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          ports:
+            # Configured for web access
+            - containerPort: 9093
+              name: http
+            # Configured for communication over the mesh
+            - containerPort: 6783
+              name: mesh
+          readinessProbe:
+            httpGet:
+              path: /#/status
+              port: 9093
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
+            - name: tfg-cluster-monitoring-alertmanager-data
+              mountPath: "/data"
+              subPath: ""
+          resources:
+            limits:
+              cpu: 10m
+              memory: 50Mi
+            requests:
+              cpu: 10m
+              memory: 50Mi
+      volumes:
+        - name: config-volume
+          configMap:
+            name: tfg-cluster-monitoring-alertmanager-config
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: k8s-app
+                operator: In
+                values:
+                - alertmanager
+            topologyKey: "kubernetes.io/hostname"
+  volumeClaimTemplates:
+  - metadata:
+      name: tfg-cluster-monitoring-alertmanager-data
+    spec:
+      storageClassName: do-block-storage
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: "2Gi"

@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: tfg-cluster-monitoring-node-exporter
+  labels:
+    k8s-app: node-exporter
+    app.kubernetes.io/name: tfg-cluster-monitoring
+    app.kubernetes.io/component: node-exporter
+spec:
+  updateStrategy:
+    type: OnDelete
+  selector:
+    matchLabels:
+      k8s-app: node-exporter
+  template:
+    metadata:
+      labels:
+        k8s-app: node-exporter
+    spec:
+      serviceAccountName: node-exporter
+      containers:
+        - name: prometheus-node-exporter
+          # Use the `quay.io/prometheus/node-exporter:v0.17.0` image
+          image: quay.io/prometheus/node-exporter:v0.17.0
+          imagePullPolicy: Always
+          args:
+            - --path.procfs=/host/proc
+            - --path.sysfs=/host/sys
+          ports:
+            # Expose metrics for scraping on port `9100`
+            - name: metrics
+              containerPort: 9100
+              hostPort: 9100
+          volumeMounts:
+            - name: proc
+              mountPath: /host/proc
+              readOnly:  true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+          # Resource limits and requests of `10m` of CPU and `50Mi` of memory
+          resources:
+            limits:
+              cpu: 10m
+              memory: 50Mi
+            requests:
+              cpu: 10m
+              memory: 50Mi
+      hostNetwork: true
+      hostPID: true
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
