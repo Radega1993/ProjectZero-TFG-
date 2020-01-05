@@ -1,8 +1,3 @@
-# Dashboards generated using kubernetes-mixin (https://github.com/kubernetes-monitoring/kubernetes-mixin)
-# Note that dashboards like the "Scheduler" dashboard have been omitted 
-# due those components not being exposed on DigitalOcean Kubernetes. 
-# To learn more about DigitalOcean Kubernetes’s architecture, consult
-# https://www.digitalocean.com/docs/kubernetes/overview/
 apiVersion: v1
 kind: ConfigMap
 metadata:
