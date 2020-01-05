@@ -7,11 +7,7 @@ metadata:
     app.kubernetes.io/name: tfg-cluster-monitoring
     app.kubernetes.io/component: alertmanager
 spec:
-  # Used to configure a stable network identity for the StatefulSet Pods 
-  # e.g. pod_name.tfg-cluster-monitoring-alertmanager-operated.$NAMESPACE.svc:6783
   serviceName: "tfg-cluster-monitoring-alertmanager-operated"
-  # To scale the number of Alertmanager replicas, you must add `—cluster.peer` addresses 
-  # for any additional Alertmanager Pods in the `args` section of the `containers` spec. 
   replicas: 2
   podManagementPolicy: OrderedReady
   updateStrategy:
