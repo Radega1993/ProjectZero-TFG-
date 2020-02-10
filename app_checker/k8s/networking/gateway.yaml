@@ -1,0 +1,37 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: checker-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: checker
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - checker-gateway
+  http:
+  - match:
+    - uri:
+        exact: /frontend
+    - uri:
+        exact: /nodes
+    - uri:
+        prefix: /pods
+    route:
+    - destination:
+        host: frontend.default.svc.cluster.local
+        port:
+          number: 8000

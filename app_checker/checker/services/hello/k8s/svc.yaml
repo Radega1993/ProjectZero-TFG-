@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello
+  labels:
+    app: hello
+    service: hello
+spec:
+  selector:
+    app: hello
+  ports:
+    - name: http
+      port: 9081
+---

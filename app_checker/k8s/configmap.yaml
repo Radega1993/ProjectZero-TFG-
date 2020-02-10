@@ -1,0 +1,9 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: frontend-configmap
+data:
+  URL_SERVICES: |
+    URLS:
+      - http://nodes:90801/nodes
+      - http://pods:9081/pods

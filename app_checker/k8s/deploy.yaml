@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: frontend
+        version: v1
+    spec:
+      serviceAccountName: check-frontend
+      containers:
+      - name: frontend
+        image: radega1993/checker-k8s:frontend
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pods
+  labels:
+    app: pods
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pods
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: pods
+        version: v1
+    spec:
+      serviceAccountName: check-pods
+      containers:
+      - name: pods
+        image: radega1993/checker-k8s:pods
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podsv1
+  labels:
+    app: pods
+    version: v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pods
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: pods
+        version: v2
+    spec:
+      serviceAccountName: check-pods
+      containers:
+      - name: pods
+        image: radega1993/checker-k8s:podsv1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodes
+  labels:
+    app: nodes
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nodes
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: nodes
+        version: v1
+    spec:
+      serviceAccountName: check-nodes
+      containers:
+      - name: nodes
+        image: radega1993/checker-k8s:nodes
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000

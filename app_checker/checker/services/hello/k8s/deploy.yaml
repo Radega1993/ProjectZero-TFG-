@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  labels:
+    app: hello
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: hello
+        version: v1
+    spec:
+      serviceAccountName: check-hello
+      containers:
+      - name: hello
+        image: radega1993/checker-k8s:hello
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9081
